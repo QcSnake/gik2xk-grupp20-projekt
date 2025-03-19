@@ -24,14 +24,18 @@ Detta är ett gruppprojekt för kursen **Design av Webbapplikationer (GIK2XK)**.
 ### Steg för att köra projektet
 
 1. **Klona repositoryt:**
-   ```
+   ```bash
    git clone https://github.com/QcSnake/gik2xk-grupp20-projekt.git
    cd gik2xk-grupp20-projekt
-   Installera beroenden för backend:
-2.Installera beroenden för backend:
+Installera beroenden för backend:
+
+bash
+Copy
 cd backend
 npm install
+Installera beroenden för frontend:
 
-3.Installera beroenden för frontend:
+bash
+Copy
 cd ../frontend
 npm install
