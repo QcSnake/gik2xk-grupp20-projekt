@@ -29,13 +29,10 @@ Detta är ett gruppprojekt för kursen **Design av Webbapplikationer (GIK2XK)**.
    cd gik2xk-grupp20-projekt
 Installera beroenden för backend:
 
-bash
-Copy
 cd backend
 npm install
+
 Installera beroenden för frontend:
 
-bash
-Copy
 cd ../frontend
 npm install
