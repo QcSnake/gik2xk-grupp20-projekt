@@ -1,38 +1,9 @@
 # Webbshop - Grupp 20
 
-Detta är ett gruppprojekt för kursen **Design av Webbapplikationer (GIK2XK)**. Vi bygger en webbshop med både kund- och administratörsfunktioner. Projektet är byggt med **Node.js** och **Express** för backend, **React** för frontend, och en **SQL-databas** (MySQL/MariaDB/SQLite) med **Sequelize** som ORM.
+Detta är vårt gruppprojekt för kursen **Design av Webbapplikationer (GIK2XK)**. Vi bygger en webbshop med både kund- och administratörsfunktioner. Projektet är byggt med **Node.js** och **Express** för backend, **React** för frontend, och en **SQL-databas** (MySQL/MariaDB/SQLite) med **Sequelize** som ORM. Tekniker som används inkluderar **Node.js**, **Express**, **Sequelize**, **React**, **Material UI/Bootstrap**, och **Git/GitHub** för versionshantering. Funktionella krav inkluderar att kunder ska kunna visa produkter och produktdetaljer (bilder, betyg, möjlighet att betygsätta), lägga produkter i en varukorg och se en sammanfattning av varukorgen. Administratörer ska kunna skapa, ändra och ta bort produkter.
 
-## Tekniker som används
-- **Backend:** Node.js, Express, Sequelize
-- **Frontend:** React, Material UI/Bootstrap
-- **Databas:** SQL (MySQL/MariaDB/SQLite)
-- **Versionshantering:** Git, GitHub
+För att sätta upp projektet lokalt behöver du ha **Node.js** och **npm** installerade på din dator, samt en **SQL-databas** (t.ex. MySQL, MariaDB eller SQLite) konfigurerad. Börja med att klona repositoryt genom att öppna terminalen och köra `git clone https://github.com/QcSnake/gik2xk-grupp20-projekt.git` och sedan `cd gik2xk-grupp20-projekt`. För att installera beroenden för backend, gå till `backend`-mappen och kör `npm install`. För frontend, gå till `frontend`-mappen och kör `npm install`. Skapa sedan en `.env`-fil i `backend/`-mappen och lägg till följande miljövariabler: `DB_HOST=localhost`, `DB_USER=root`, `DB_PASSWORD=ditt_lösenord`, `DB_NAME=webbshop`, och `DB_DIALECT=mysql` (eller `sqlite` om du använder SQLite). Om du använder SQLite behöver du inte ange `DB_HOST`, `DB_USER` eller `DB_PASSWORD`. Synka databasen genom att köra `npx sequelize-cli db:migrate` i `backend`-mappen. Starta backend-servern med `npm start` (den körs på `http://localhost:5000`) och starta sedan React-appen med `npm start` i `frontend`-mappen (den öppnas på `http://localhost:3000`).
 
-## Funktionella krav
-- **Kundvyer:**
-  - Visa produkter och produktdetaljer (bilder, betyg, möjlighet att betygsätta).
-  - Lägga produkter i en varukorg och se en sammanfattning av varukorgen.
-- **Administratörsvyer:**
-  - Skapa, ändra och ta bort produkter.
+För att bidra till projektet, skapa en ny branch med `git checkout -b ditt-branch-namn`, gör dina ändringar, commit:a dem med `git add .` och `git commit -m "Beskriv dina ändringar"`, och push:a till GitHub med `git push origin ditt-branch-namn`. Skapa sedan en pull request på GitHub och vänta på feedback från gruppen innan du mergar in dina ändringar. Som kund kan du besöka `http://localhost:3000` för att bläddra bland produkter, se produktdetaljer, lägga produkter i varukorgen och se en sammanfattning av varukorgen. Som administratör kan du använda **Postman** eller liknande verktyg för att skapa, ändra eller ta bort produkter via API:et. Om du har frågor eller behöver hjälp, skicka ett meddelande i gruppchatten eller öppna ett issue på GitHub.
 
-## Hur man sätter upp projektet lokalt
-
-### Förutsättningar
-- **Node.js** och **npm** måste vara installerade på din dator.
-- En **SQL-databas** (t.ex. MySQL, MariaDB eller SQLite) måste vara konfigurerad.
-
-### Steg för att köra projektet
-
-1. **Klona repositoryt:**
-   ```bash
-   git clone https://github.com/QcSnake/gik2xk-grupp20-projekt.git
-   cd gik2xk-grupp20-projekt
-Installera beroenden för backend:
-
-cd backend
-npm install
-
-Installera beroenden för frontend:
-
-cd ../frontend
-npm install
+**Lycka till!** 🚀
