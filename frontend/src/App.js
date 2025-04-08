@@ -48,11 +48,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          }
+          // Removed hover effects as requested
         }
       }
     }
@@ -93,13 +89,10 @@ function AppContent() {
               Snabbis
             </Typography>
             
-            {/* Horizontal Navigation Menu */}
+            {/* Horizontal Navigation Menu - Translated to Swedish */}
             <Stack direction="row" spacing={2}>
               <Button color="inherit" component={Link} to="/">
-                Home
-              </Button>
-              <Button color="inherit" component={Link} to="/products">
-                Products
+                Produkter
               </Button>
               {isAdmin && (
                 <Button color="inherit" component={Link} to="/admin">
@@ -124,10 +117,10 @@ function AppContent() {
                 <Avatar 
                   sx={{ width: 32, height: 32, bgcolor: isAdmin ? 'secondary.main' : 'primary.main', mr: 2 }}
                 >
-                  {user.f_name ? user.f_name[0].toUpperCase() : 'U'}
+                  {user.f_name ? user.f_name[0].toUpperCase() : 'A'}
                 </Avatar>
                 <Button color="inherit" onClick={handleLogout}>
-                  Logout
+                  Logga ut
                 </Button>
               </Box>
             ) : (
@@ -136,7 +129,7 @@ function AppContent() {
                 to="/login" 
                 color="inherit"
               >
-                Login
+                Logga in
               </Button>
             )}
           </Box>
@@ -145,6 +138,7 @@ function AppContent() {
 
       <Container sx={{ mt: 4, pb: 8 }}>
         <Routes>
+          {/* Home and Products now use the same component */}
           <Route path="/" element={<Products />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productDetail/:id" element={<ProductDetail />} />

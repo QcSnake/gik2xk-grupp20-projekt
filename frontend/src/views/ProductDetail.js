@@ -65,21 +65,21 @@ function ProductDetail() {
 
   const handleSubmitReview = async () => {
     if (!user) {
-      setAlertMessage("Please log in to submit a review");
+      setAlertMessage("Vänligen logga in för att lämna en recension");
       setAlertSeverity("warning");
       setAlertOpen(true);
       return;
     }
 
     if (reviewRating === 0) {
-      setAlertMessage("Please select a rating");
+      setAlertMessage("Vänligen välj ett betyg");
       setAlertSeverity("warning");
       setAlertOpen(true);
       return;
     }
 
     if (reviewText.trim() === "") {
-      setAlertMessage("Please enter a review comment");
+      setAlertMessage("Vänligen skriv en recension");
       setAlertSeverity("warning");
       setAlertOpen(true);
       return;
@@ -94,7 +94,7 @@ function ProductDetail() {
 
       await addReview(id, review);
       
-      // Refresh product data to show the new review
+      // Refresh product data to show the new review and updated average
       const updatedProduct = await getProductsById(id);
       setProduct(updatedProduct);
       
@@ -102,7 +102,7 @@ function ProductDetail() {
       setReviewRating(0);
       setReviewText("");
       
-      setAlertMessage("Review submitted successfully!");
+      setAlertMessage("Recension har skickats!");
       setAlertSeverity("success");
       setAlertOpen(true);
     } catch (err) {
@@ -191,7 +191,7 @@ function ProductDetail() {
                     sx={{ mr: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary">
-                    ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
+                    ({reviews.length} {reviews.length === 1 ? "recension" : "recensioner"})
                   </Typography>
                 </Box>
 
@@ -200,7 +200,7 @@ function ProductDetail() {
                   color="primary"
                   sx={{ mb: 2, fontWeight: "bold" }}
                 >
-                  ${product.price}
+                  {product.price} kr
                 </Typography>
 
                 <Typography variant="body1" paragraph>
@@ -209,7 +209,7 @@ function ProductDetail() {
 
                 <Box sx={{ display: "flex", alignItems: "center", mt: 3 }}>
                   <TextField
-                    label="Quantity"
+                    label="Antal"
                     type="number"
                     InputProps={{ inputProps: { min: 1 } }}
                     value={quantity}
@@ -230,14 +230,14 @@ function ProductDetail() {
                     size="large"
                     onClick={handleAddToCart}
                   >
-                    Add to Cart
+                    Lägg i kundvagn
                   </Button>
                 </Box>
 
                 <Box sx={{ mt: 2 }}>
                   <Chip
                     color="success"
-                    label={product.units > 0 ? "In Stock" : "Out of Stock"}
+                    label={product.units > 0 ? "I lager" : "Slut i lager"}
                     sx={{ mr: 1 }}
                   />
                 </Box>
@@ -251,11 +251,11 @@ function ProductDetail() {
           <Card sx={{ mb: 4 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Write a Review
+                Skriv en recension
               </Typography>
 
               <Box sx={{ mb: 2 }}>
-                <Typography component="legend">Your Rating</Typography>
+                <Typography component="legend">Ditt betyg</Typography>
                 <Rating
                   name="rating"
                   value={reviewRating}
@@ -267,7 +267,7 @@ function ProductDetail() {
               </Box>
 
               <TextField
-                label="Your Review"
+                label="Din recension"
                 multiline
                 rows={4}
                 fullWidth
@@ -281,7 +281,7 @@ function ProductDetail() {
                 onClick={handleSubmitReview}
                 fullWidth
               >
-                Submit Review
+                Skicka recension
               </Button>
             </CardContent>
           </Card>
@@ -289,12 +289,12 @@ function ProductDetail() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Customer Reviews
+                Kundrecensioner
               </Typography>
 
               {reviews.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
-                  No reviews yet. Be the first to review this product!
+                  Inga recensioner än. Bli först med att recensera denna produkt!
                 </Typography>
               ) : (
                 <>
@@ -312,7 +312,7 @@ function ProductDetail() {
                       sx={{ mr: 1 }}
                     />
                     <Typography variant="body2">
-                      {averageRating.toFixed(1)} out of 5
+                      {averageRating.toFixed(1)} av 5
                     </Typography>
                   </Box>
 

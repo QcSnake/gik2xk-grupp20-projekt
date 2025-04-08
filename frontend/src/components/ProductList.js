@@ -11,13 +11,13 @@ import {
   CardMedia,
   CardActions,
   Button,
-  Rating,
+  Rating, // Make sure this import is included
   Fade,
   TextField,
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getAllProducts } from "../models/productModel";
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import SearchIcon from '@mui/icons-material/Search';
@@ -29,13 +29,19 @@ function ProductList({ pathname }) {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
     getAllProducts()
       .then(data => {
-        console.log("Products fetched:", data);
-        setProducts(data);
+        console.log("Products fetched with ratings:", data);
+        // Make sure each product has a valid averageRating value
+        const productsWithDefaultRatings = data.map(product => ({
+          ...product,
+          averageRating: product.averageRating || 0
+        }));
+        setProducts(productsWithDefaultRatings);
         setLoading(false);
       })
       .catch(err => {
@@ -49,6 +55,10 @@ function ProductList({ pathname }) {
     product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleCardClick = (productId) => {
+    navigate(`/productDetail/${productId}`);
+  };
 
   const handleAddToCart = (product, event) => {
     event.preventDefault();
@@ -74,7 +84,7 @@ function ProductList({ pathname }) {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Search products..."
+          placeholder="Sök produkter..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{
@@ -88,14 +98,20 @@ function ProductList({ pathname }) {
       </Box>
 
       <Grid container spacing={3}>
-        {filteredProducts.map((product) => (
+        {filteredProducts.map((product) => {
+          console.log(`Product ${product.id} rating:`, product.averageRating);
+          return (
           <Grid item xs={12} sm={6} md={4} key={`product_${product.id}`}>
             <Fade in={true} timeout={500}>
-              <Card sx={{ 
-                height: "100%", 
-                display: "flex", 
-                flexDirection: "column",
-              }}>
+              <Card 
+                sx={{ 
+                  height: "100%", 
+                  display: "flex", 
+                  flexDirection: "column",
+                  cursor: 'pointer'
+                }}
+                onClick={() => handleCardClick(product.id)}
+              >
                 <CardMedia
                   component="img"
                   height="200"
@@ -103,8 +119,7 @@ function ProductList({ pathname }) {
                   alt={product.title}
                 />
                 <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" component={Link} to={`/productDetail/${product.id}`} 
-                    sx={{ textDecoration: 'none', color: 'inherit', display: 'block', mb: 1 }}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>
                     {product.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ 
@@ -117,11 +132,11 @@ function ProductList({ pathname }) {
                   }}>
                     {product.description}
                   </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="h6" color="primary">
-                      ${product.price}
+                      {product.price} kr
                     </Typography>
-                    <Rating value={4} readOnly size="small" />
+                    {/* Rating component removed as requested */}
                   </Box>
                 </CardContent>
                 <CardActions>
@@ -132,13 +147,13 @@ function ProductList({ pathname }) {
                     fullWidth
                     onClick={(e) => handleAddToCart(product, e)}
                   >
-                    Add to Cart
+                    Lägg i kundvagn
                   </Button>
                 </CardActions>
               </Card>
             </Fade>
           </Grid>
-        ))}
+        )})}
       </Grid>
     </Container>
   );

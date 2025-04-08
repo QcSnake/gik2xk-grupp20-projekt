@@ -31,7 +31,7 @@ function Cart() {
   );
 
   const handleCheckout = () => {
-    setAlertMessage("Checkout functionality is not implemented yet.");
+    setAlertMessage("Utcheckning är inte implementerad ännu.");
     setAlertOpen(true);
   };
 
@@ -43,13 +43,13 @@ function Cart() {
     return (
       <Box textAlign="center" py={8}>
         <Typography variant="h5" gutterBottom>
-          Your shopping cart is empty
+          Din kundvagn är tom
         </Typography>
         <Typography variant="body1" color="textSecondary" paragraph>
-          Looks like you haven't added any products to your cart yet.
+          Du har inte lagt till några produkter i din kundvagn ännu.
         </Typography>
         <Button variant="contained" color="primary" href="/">
-          Continue Shopping
+          Fortsätt shoppa
         </Button>
       </Box>
     );
@@ -58,7 +58,7 @@ function Cart() {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Shopping Cart
+        Kundvagn
       </Typography>
 
       <Grid container spacing={4}>
@@ -190,8 +190,8 @@ function Cart() {
                 }}
               >
                 <Typography variant="body1">
-                  Subtotal ({cartItems.reduce((a, c) => a + (c.quantity || 1), 0)}{" "}
-                  items)
+                  Delsumma ({cartItems.reduce((a, c) => a + (c.quantity || 1), 0)}{" "}
+                  varor)
                 </Typography>
                 <Typography variant="body1">${totalPrice.toFixed(2)}</Typography>
               </Box>
@@ -203,8 +203,8 @@ function Cart() {
                   mb: 1,
                 }}
               >
-                <Typography variant="body1">Shipping</Typography>
-                <Typography variant="body1">Free</Typography>
+                <Typography variant="body1">Frakt</Typography>
+                <Typography variant="body1">Gratis</Typography>
               </Box>
 
               <Divider sx={{ my: 2 }} />
@@ -216,8 +216,8 @@ function Cart() {
                   mb: 2,
                 }}
               >
-                <Typography variant="h6">Total</Typography>
-                <Typography variant="h6">${totalPrice.toFixed(2)}</Typography>
+                <Typography variant="h6">Totalt</Typography>
+                <Typography variant="h6">{totalPrice.toFixed(2)} kr</Typography>
               </Box>
 
               <Button
@@ -227,7 +227,7 @@ function Cart() {
                 size="large"
                 onClick={handleCheckout}
               >
-                Proceed to Checkout
+                Gå till kassan
               </Button>
             </CardContent>
           </Card>

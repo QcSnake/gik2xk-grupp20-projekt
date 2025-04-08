@@ -6,8 +6,14 @@ export async function getAllProducts(url= '/products') {
     const result = await api.get(url);
     
     if (result.status === 200) {
-      console.log("Products received:", result.data);
-      return result.data;
+      // Ensure ratings are properly formatted as numbers
+      const products = result.data.map(product => ({
+        ...product,
+        averageRating: Number(product.averageRating) || 0
+      }));
+      
+      console.log("Products received with ratings:", products);
+      return products;
     } else {
       console.log("Unexpected status:", result.status);
       console.log("Response data:", result.data);

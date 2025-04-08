@@ -19,9 +19,26 @@ router.get("/", async (req, res) => {
     
     // Check if product model is available
     if (db.product) {
-      const products = await db.product.findAll();
+      const products = await db.product.findAll({
+        include: [{ model: db.review }]
+      });
+      
+      // Calculate average ratings for each product
+      const productsWithRatings = products.map(product => {
+        const productObj = product.toJSON();
+        if (productObj.reviews && productObj.reviews.length > 0) {
+          // Ensure we're dealing with numbers when calculating averages
+          const totalRating = productObj.reviews.reduce((sum, review) => sum + Number(review.rating), 0);
+          productObj.averageRating = parseFloat((totalRating / productObj.reviews.length).toFixed(1));
+          console.log(`Product ${productObj.id} has average rating: ${productObj.averageRating} from ${productObj.reviews.length} reviews`);
+        } else {
+          productObj.averageRating = 0;
+        }
+        return productObj;
+      });
+      
       console.log(`Found ${products.length} products using model`);
-      return res.status(200).json(products);
+      return res.status(200).json(productsWithRatings);
     }
     
     // Fallback to raw SQL if model isn't available
@@ -39,11 +56,32 @@ router.get("/", async (req, res) => {
 });
 
 // GET /products/:id - Get product by ID (no authentication required)
-router.get("/:id", (req, res) => {
-  const id = req.params.id;
-  productServices.getProductById(id).then((result) => {
-    res.status(result.status).json(result.data);
-  });
+router.get("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const product = await db.product.findByPk(id, {
+      include: [{ model: db.review }]
+    });
+    
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    
+    const productObj = product.toJSON();
+    
+    // Calculate average rating
+    if (productObj.reviews && productObj.reviews.length > 0) {
+      const totalRating = productObj.reviews.reduce((sum, review) => sum + review.rating, 0);
+      productObj.averageRating = totalRating / productObj.reviews.length;
+    } else {
+      productObj.averageRating = 0;
+    }
+    
+    return res.status(200).json(productObj);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ error: "Failed to fetch product" });
+  }
 });
 
 // POST /products - Create new product (admin only)

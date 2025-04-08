@@ -126,10 +126,10 @@ function ProductEdit() {
           onClick={() => navigate('/admin')}
           sx={{ mr: 2 }}
         >
-          Back to Admin
+          Tillbaka till Admin
         </Button>
         <Typography variant="h4">
-          {isNewProduct ? "Add New Product" : "Edit Product"}
+          {isNewProduct ? "Lägg till ny produkt" : "Redigera produkt"}
         </Typography>
       </Box>
       
@@ -141,7 +141,7 @@ function ProductEdit() {
                 fullWidth
                 name="title"
                 id="title"
-                label="Title"
+                label="Titel"
                 variant="outlined"
                 margin="normal"
                 value={product.title}
@@ -151,7 +151,7 @@ function ProductEdit() {
               
               <TextField
                 name="description"
-                label="Description"
+                label="Beskrivning"
                 value={product.description}
                 fullWidth
                 multiline
@@ -165,7 +165,7 @@ function ProductEdit() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     name="price"
-                    label="Price"
+                    label="Pris"
                     type="number"
                     value={product.price}
                     fullWidth
@@ -178,7 +178,7 @@ function ProductEdit() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     name="units"
-                    label="Units in Stock"
+                    label="Antal i lager"
                     type="number"
                     value={product.units}
                     fullWidth
@@ -191,12 +191,12 @@ function ProductEdit() {
               
               <TextField
                 name="productImg"
-                label="Image URL"
+                label="Bild URL"
                 value={product.productImg}
                 fullWidth
                 margin="normal"
                 onChange={(e) => setProduct({ ...product, productImg: e.target.value })}
-                helperText="Enter a URL to the product image"
+                helperText="Ange en URL till produktbilden"
               />
 
               <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
@@ -208,7 +208,7 @@ function ProductEdit() {
                   disabled={loading}
                   size="large"
                 >
-                  {isNewProduct ? "Create Product" : "Update Product"}
+                  {isNewProduct ? "Skapa produkt" : "Uppdatera produkt"}
                 </Button>
 
                 {!isNewProduct && (
@@ -219,7 +219,7 @@ function ProductEdit() {
                     onClick={onDelete}
                     disabled={loading}
                   >
-                    Delete
+                    Ta bort
                   </Button>
                 )}
               </Box>
@@ -230,7 +230,7 @@ function ProductEdit() {
         <Grid item xs={12} md={4}>
           <Card>
             <Typography variant="h6" sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
-              Product Preview
+              Produktförhandsvisning
             </Typography>
             <Divider />
             <CardMedia
@@ -256,7 +256,7 @@ function ProductEdit() {
           </Card>
           
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
-            This is how your product will appear to customers
+            Så här kommer produkten att visas för kunderna
           </Typography>
         </Grid>
       </Grid>

@@ -69,9 +69,23 @@ if (db.user && db.review) {
   db.review.belongsTo(db.user);
 }
 
+// Make sure the product-review relationship is properly defined 
+// (add this if it's not already present):
 if (db.product && db.review) {
   db.product.hasMany(db.review);
   db.review.belongsTo(db.product);
+}
+
+// Make sure we use lowercase model names throughout for consistency
+if (db.product && db.review) {
+  db.product.hasMany(db.review, { foreignKey: 'productId' });
+  db.review.belongsTo(db.product, { foreignKey: 'productId' });
+}
+
+// Explicitly check for uppercase models too to avoid any issues
+if (db.Product && db.Review) {
+  db.Product.hasMany(db.Review, { foreignKey: 'productId' });
+  db.Review.belongsTo(db.Product, { foreignKey: 'productId' });
 }
 
 if (db.user && db.cart) {
