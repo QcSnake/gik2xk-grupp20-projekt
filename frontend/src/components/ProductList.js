@@ -11,13 +11,11 @@ import {
   CardMedia,
   CardActions,
   Button,
-  Rating, // Make sure this import is included
   Fade,
   TextField,
   InputAdornment,
-  IconButton,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getAllProducts } from "../models/productModel";
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import SearchIcon from '@mui/icons-material/Search';
@@ -35,8 +33,6 @@ function ProductList({ pathname }) {
     setLoading(true);
     getAllProducts()
       .then(data => {
-        console.log("Products fetched with ratings:", data);
-        // Make sure each product has a valid averageRating value
         const productsWithDefaultRatings = data.map(product => ({
           ...product,
           averageRating: product.averageRating || 0
@@ -45,8 +41,7 @@ function ProductList({ pathname }) {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Could not fetch products:", err);
-        setError("Failed to load products. Please try again later.");
+        setError("Kunde inte hämta produkter. Försök igen senare.");
         setLoading(false);
       });
   }, [pathname]);
@@ -75,7 +70,7 @@ function ProductList({ pathname }) {
   if (error) return <Typography color="error">{error}</Typography>;
   
   if (!products || products.length === 0) {
-    return <Typography>No products available at the moment.</Typography>;
+    return <Typography>Inga produkter tillgängliga just nu.</Typography>;
   }
 
   return (
@@ -98,9 +93,7 @@ function ProductList({ pathname }) {
       </Box>
 
       <Grid container spacing={3}>
-        {filteredProducts.map((product) => {
-          console.log(`Product ${product.id} rating:`, product.averageRating);
-          return (
+        {filteredProducts.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={`product_${product.id}`}>
             <Fade in={true} timeout={500}>
               <Card 
@@ -136,7 +129,6 @@ function ProductList({ pathname }) {
                     <Typography variant="h6" color="primary">
                       {product.price} kr
                     </Typography>
-                    {/* Rating component removed as requested */}
                   </Box>
                 </CardContent>
                 <CardActions>
@@ -153,7 +145,7 @@ function ProductList({ pathname }) {
               </Card>
             </Fade>
           </Grid>
-        )})}
+        ))}
       </Grid>
     </Container>
   );

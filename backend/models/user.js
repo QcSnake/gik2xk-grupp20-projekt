@@ -19,12 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         l_name: DataTypes.STRING(50),
         password: {
           type: DataTypes.STRING(200),
-          allowNull: true, // Temporarily allow null for existing users
+          allowNull: true,
         },
         role: {
           type: DataTypes.ENUM('admin', 'customer'),
           defaultValue: 'customer',
-          allowNull: true // Temporarily allow null for existing users
+          allowNull: true // Temporarily
         }
       },
       {

@@ -3,23 +3,20 @@ const db = require("../models");
 const productServices = require('../services/productServices');
 const { requireAuth } = require("../middleware/authMiddleware");
 
-// All cart routes require authentication
 router.use(requireAuth);
 
-// Get a specific cart by ID
+// Hämta kundvagn med ID
 router.get("/:id", (req, res) => {
   const id = req.params.id;
-  // Verify the user owns this cart or is admin
   productServices.getById(id).then((result) => {
     if (result.data && (result.data.user.id === req.user.id || req.user.role === 'admin')) {
       res.status(result.status).json(result.data);
     } else {
-      res.status(403).json({ error: "Not authorized to access this cart" });
+      res.status(403).json({ error: "Ej behörig" });
     }
   });
 });
 
-// Get current user's cart
 router.get("/user/current", (req, res) => {
   const userId = req.user.id;
   productServices.getByUser(userId).then((result) => {
@@ -27,10 +24,9 @@ router.get("/user/current", (req, res) => {
   });
 });
 
-// Create a new cart
+// Skapa kundvagn
 router.post('/', (req, res) => {
   const cart = req.body;
-  // Ensure the cart belongs to the current user
   cart.userId = req.user.id;
   
   productServices.create(cart).then((result) => {
@@ -38,15 +34,14 @@ router.post('/', (req, res) => {
   });
 });
 
-// Update a cart (simple update)
+// Enkel uppdatering
 router.put("/", (req, res) => {
   const cart = req.body;
   const id = cart.id;
   
-  // Verify the user owns this cart or is admin
   db.cart.findOne({ where: { id } }).then(existingCart => {
     if (!existingCart || (existingCart.userId !== req.user.id && req.user.role !== 'admin')) {
-      return res.status(403).json({ error: "Not authorized to update this cart" });
+      return res.status(403).json({ error: "Ej behörig" });
     }
     
     db.cart.update(cart, {
@@ -57,15 +52,13 @@ router.put("/", (req, res) => {
   });
 });
 
-// Comprehensive cart update
 router.put("/:id", (req, res) => {
   const id = req.params.id;
   const cart = req.body;
   
-  // Verify the user owns this cart or is admin
   db.cart.findOne({ where: { id } }).then(existingCart => {
     if (!existingCart || (existingCart.userId !== req.user.id && req.user.role !== 'admin')) {
-      return res.status(403).json({ error: "Not authorized to update this cart" });
+      return res.status(403).json({ error: "Ej behörig" });
     }
     
     productServices.updateCart(id, cart).then((result) => {
@@ -74,18 +67,17 @@ router.put("/:id", (req, res) => {
   });
 });
 
-// Delete a cart
+// Ta bort kundvagn
 router.delete("/:id", (req, res) => {
   const id = req.params.id;
   
-  // Verify the user owns this cart or is admin
   db.cart.findOne({ where: { id } }).then(existingCart => {
     if (!existingCart || (existingCart.userId !== req.user.id && req.user.role !== 'admin')) {
-      return res.status(403).json({ error: "Not authorized to delete this cart" });
+      return res.status(403).json({ error: "Ej behörig" });
     }
     
     db.cart.destroy({ where: { id } }).then((result) => {
-      res.json(`Cart deleted successfully`);
+      res.json(`Kundvagn borttagen`);
     });
   });
 });

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define("cartRow", {
-        // Explicitly define the foreign keys that will be used
+        
         cartId: {
             type: DataTypes.INTEGER,
             field: 'cart_id',

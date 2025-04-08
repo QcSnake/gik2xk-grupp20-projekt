@@ -9,7 +9,6 @@ router.post("/login", (req, res) => {
   });
 });
 
-// Add registration endpoint
 router.post("/register", (req, res) => {
   const userData = req.body;
   authService.register(userData).then((result) => {
@@ -17,7 +16,7 @@ router.post("/register", (req, res) => {
   });
 });
 
-// Add reset database endpoint (admin only)
+// (admin only)
 router.post("/resetDatabase", requireAdmin, (req, res) => {
   authService.resetDatabase().then((result) => {
     res.status(result.status).json(result.data);

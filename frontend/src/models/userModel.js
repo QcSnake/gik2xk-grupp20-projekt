@@ -17,14 +17,8 @@ export async function getAllUsers() {
 
 export async function getByUserID(id) {
   const result = await api.get(`/users/${id}`);
- 
   if (result.status === 200) return result.data;
-  
-  else {
-    console.log(result.status);
-    console.log(result.data);
-    return [];
-  }
+  return [];
 }
 
 export async function getReviewByUserID(id) {
@@ -53,12 +47,7 @@ export async function getReviewById(id) {
 
 export async function create(user) {
   const result = await api.post("/users/", user);
-
   if (result.status === 200) return result.data;
-  else {
-    console.log(result.status);
-    console.log(result.data);
-}
 }
 
 export async function updateReview(review, id) {
@@ -73,15 +62,9 @@ export async function updateReview(review, id) {
 }
 
 export async function update(user) {
-  console.log(user);
   const result = await api.put(`/users/${user.id}`, user);
-
   if (result.status === 200) return result.data;
-  else {
-    console.log(result.status);
-    console.log(result.data);
-    return {};
-  }
+  return {};
 }
 
 export async function remove(review) {

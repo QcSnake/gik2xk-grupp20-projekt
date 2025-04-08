@@ -24,7 +24,7 @@ function Cart() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  // Calculate the total price of all items in the cart
+  // Beräkna totalpriset för alla varor i kundvagnen
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -102,7 +102,7 @@ function Cart() {
                         color="textSecondary"
                         sx={{ mb: 1 }}
                       >
-                        ${item.price.toFixed(2)}
+                        {item.price} kr
                       </Typography>
                     </Box>
 
@@ -166,7 +166,7 @@ function Cart() {
                     }}
                   >
                     <Typography variant="h6">
-                      ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                      {((item.price || 0) * (item.quantity || 1)).toFixed(2)} kr
                     </Typography>
                   </Box>
                 </Box>
@@ -179,7 +179,7 @@ function Cart() {
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Order Summary
+                Ordersammanfattning
               </Typography>
 
               <Box
@@ -193,7 +193,7 @@ function Cart() {
                   Delsumma ({cartItems.reduce((a, c) => a + (c.quantity || 1), 0)}{" "}
                   varor)
                 </Typography>
-                <Typography variant="body1">${totalPrice.toFixed(2)}</Typography>
+                <Typography variant="body1">{totalPrice.toFixed(2)} kr</Typography>
               </Box>
 
               <Box

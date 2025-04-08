@@ -12,50 +12,39 @@ const constraints = {
   }
 };
 
-// GET /products - Get all products (no authentication required)
+// Hämta alla produkter
 router.get("/", async (req, res) => {
   try {
-    console.log("GET /products route hit");
-    
-    // Check if product model is available
     if (db.product) {
       const products = await db.product.findAll({
         include: [{ model: db.review }]
       });
       
-      // Calculate average ratings for each product
       const productsWithRatings = products.map(product => {
         const productObj = product.toJSON();
         if (productObj.reviews && productObj.reviews.length > 0) {
-          // Ensure we're dealing with numbers when calculating averages
           const totalRating = productObj.reviews.reduce((sum, review) => sum + Number(review.rating), 0);
           productObj.averageRating = parseFloat((totalRating / productObj.reviews.length).toFixed(1));
-          console.log(`Product ${productObj.id} has average rating: ${productObj.averageRating} from ${productObj.reviews.length} reviews`);
         } else {
           productObj.averageRating = 0;
         }
         return productObj;
       });
       
-      console.log(`Found ${products.length} products using model`);
       return res.status(200).json(productsWithRatings);
     }
     
-    // Fallback to raw SQL if model isn't available
-    console.log("Product model not available, using raw SQL");
     const [products] = await db.sequelize.query(`
       SELECT * FROM products
     `);
     
-    console.log(`Found ${products.length} products using raw SQL`);
     res.status(200).json(products);
   } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).json({ error: "Failed to fetch products" });
+    res.status(500).json({ error: "Kunde inte hämta produkter" });
   }
 });
 
-// GET /products/:id - Get product by ID (no authentication required)
+// Hämta produkt med ID
 router.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
@@ -64,12 +53,11 @@ router.get("/:id", async (req, res) => {
     });
     
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({ error: "Produkt hittades inte" });
     }
     
     const productObj = product.toJSON();
     
-    // Calculate average rating
     if (productObj.reviews && productObj.reviews.length > 0) {
       const totalRating = productObj.reviews.reduce((sum, review) => sum + review.rating, 0);
       productObj.averageRating = totalRating / productObj.reviews.length;
@@ -79,41 +67,34 @@ router.get("/:id", async (req, res) => {
     
     return res.status(200).json(productObj);
   } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ error: "Failed to fetch product" });
+    res.status(500).json({ error: "Kunde inte hämta produkt" });
   }
 });
 
-// POST /products - Create new product (admin only)
+// Skapa ny produkt (endast admin)
 router.post("/", (req, res) => {
   try {
     const product = req.body;
-    console.log("Received product creation request:", product);
     
-    // Basic validation
     if (!product.title || !product.description || product.price === undefined) {
       return res.status(400).json({ 
-        error: "Invalid product data. Title, description, and price are required." 
+        error: "Ogiltig produktdata. Titel, beskrivning och pris krävs." 
       });
     }
     
-    // Create the product
     db.product.create(product)
       .then((result) => {
-        console.log("Product created successfully:", result.id);
         res.status(200).json(result);
       })
       .catch(err => {
-        console.error("Error creating product:", err);
-        res.status(500).json({ error: "Failed to create product: " + err.message });
+        res.status(500).json({ error: "Kunde inte skapa produkt: " + err.message });
       });
   } catch (error) {
-    console.error("Error in product creation route:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Serverfel" });
   }
 });
 
-// POST /products/:id/addToCart - Add product to cart (authenticated users only)
+// Lägg till produkt i kundvagn
 router.post("/:id/addToCart", requireAuth, (req, res) => {
   const product = req.body;
   db.product.create(product).then((result) => {
@@ -121,11 +102,10 @@ router.post("/:id/addToCart", requireAuth, (req, res) => {
   });
 });
 
-// POST /products/:id/createReview - Create review for a product (authenticated users only)
+// Skapa recension för produkt
 router.post("/:id/createReview", requireAuth, (req, res) => {
   const prodId = req.params.id;
   const review = req.body;
-  // Ensure the review is linked to the current user
   review.userId = req.user.id;
   
   productServices.addReview(prodId, review).then((result) => {
@@ -133,61 +113,53 @@ router.post("/:id/createReview", requireAuth, (req, res) => {
   });
 });
 
-// PUT /products/:id - Update product by ID (admin only)
+// Uppdatera produkt (endast admin)
 router.put("/:id", requireAdmin, (req, res) => {
   try {
     const id = req.params.id;
     const product = req.body;
-    console.log(`Updating product ${id}:`, product);
     
     db.product.update(product, {
       where: { id: id }
     })
     .then(([updated]) => {
       if (updated) {
-        console.log(`Product ${id} updated successfully`);
         return db.product.findByPk(id);
       } else {
-        throw new Error("Product not found");
+        throw new Error("Produkt hittades inte");
       }
     })
     .then(updatedProduct => {
       res.status(200).json(updatedProduct);
     })
     .catch(err => {
-      console.error("Error updating product:", err);
-      res.status(500).json({ error: "Failed to update product: " + err.message });
+      res.status(500).json({ error: "Kunde inte uppdatera produkt: " + err.message });
     });
   } catch (error) {
-    console.error("Error in product update route:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Serverfel" });
   }
 });
 
-// DELETE /products/:id - Delete product by ID (admin only)
+// Ta bort produkt (endast admin)
 router.delete("/:id", requireAdmin, (req, res) => {
   try {
     const id = req.params.id;
-    console.log(`Deleting product ${id}`);
     
     db.product.destroy({
       where: { id: id }
     })
     .then((deleted) => {
       if (deleted) {
-        console.log(`Product ${id} deleted successfully`);
-        res.status(200).json({ message: "Product deleted successfully" });
+        res.status(200).json({ message: "Produkt borttagen" });
       } else {
-        throw new Error("Product not found");
+        throw new Error("Produkt hittades inte");
       }
     })
     .catch(err => {
-      console.error("Error deleting product:", err);
-      res.status(500).json({ error: "Failed to delete product: " + err.message });
+      res.status(500).json({ error: "Kunde inte ta bort produkt: " + err.message });
     });
   } catch (error) {
-    console.error("Error in product delete route:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Serverfel" });
   }
 });
 

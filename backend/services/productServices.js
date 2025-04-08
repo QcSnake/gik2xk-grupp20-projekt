@@ -1,39 +1,24 @@
 const db = require("../models");
-
 const {
   createResponseSuccess,
   createResponseError,
   createResponseMessage,
 } = require("../helpers/responseHelper");
 
-//Tar imot ett produkt ID och hämtar ut produkten med det ID:t
-//lägg till hämta kommentar och betyg
+// Hämtar produkt med ID och recensioner
 async function getProductById(productId) {
   try {
-    const products = await db.product.findOne({ where: { id: productId },
-       include: [ db.review] });
-    //return createResponseSuccess(_formatProduct(product));
-    return createResponseSuccess(
-      _formatProduct(products)
-    );
-  } catch (error) {
-    return createResponseError(error.status, error.message);
-  }
-}
-async function getReviewById(reviewId) {
-  try {
-    const review = await db.review.findOne({ where: { id: reviewId },
-       include: [ db.user] });
-    //return createResponseSuccess(_formatProduct(product));
-    return createResponseSuccess(
-     review
-    );
+    const products = await db.product.findOne({ 
+      where: { id: productId },
+      include: [db.review] 
+    });
+    return createResponseSuccess(_formatProduct(products));
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
-// Add this function to calculate average rating for a product
+// Räknar ut medelbetyg
 async function getAverageRating(productId) {
   try {
     const reviews = await db.review.findAll({
@@ -41,26 +26,35 @@ async function getAverageRating(productId) {
       attributes: ['rating']
     });
     
-    if (!reviews || reviews.length === 0) {
-      return null;
-    }
+    if (!reviews || reviews.length === 0) return null;
     
     const sum = reviews.reduce((total, review) => total + review.rating, 0);
     return sum / reviews.length;
   } catch (error) {
-    console.error("Error calculating average rating:", error);
     return null;
   }
 }
 
-//Hämtar cart och dess produkter via user id.
+async function getReviewById(reviewId) {
+  try {
+    const review = await db.review.findOne({ 
+      where: { id: reviewId },
+      include: [db.user] 
+    });
+    return createResponseSuccess(review);
+  } catch (error) {
+    return createResponseError(error.status, error.message);
+  }
+}
+
+// Hämtar kundvagn för användare
 async function getByUser(userId) {
   try {
     const cart = await db.cart.findOne({
       where: { userId },
       include: [db.user, db.product],
     });
-    /* return createResponseSuccess(cart); */
+    
     return createResponseSuccess(_formatCart(cart));
   } catch (error) {
     return createResponseError(error.status, error.message);
@@ -73,13 +67,14 @@ async function getReviewByUser(userId) {
       where: { userId },
       include: [db.user, db.product],
     });
-    /* return createResponseSuccess(cart); */
+   
     return createResponseSuccess(review);
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
-//get user by id
+
+// Hämtar användare med ID
 async function getByUserID(userId) {
   try {
     const user = await db.user.findOne({ where: { id: userId } });
@@ -89,7 +84,7 @@ async function getByUserID(userId) {
   }
 }
 
-//För cart!  check
+// Hämtar kundvagn med ID
 async function getById(id) {
   try {
     const cart = await db.cart.findOne({
@@ -102,19 +97,17 @@ async function getById(id) {
   }
 }
 
-//Hämta alla produkter
-//check
+// Hämtar alla produkter
 async function getAllProducts() {
   try {
-    const allProducts = await db.product.findAll({
-    });
+    const allProducts = await db.product.findAll({});
     return createResponseSuccess(allProducts);
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
-//get all users
-//check
+
+// Hämtar alla användare
 async function getAllUsers() {
   try {
     const allUsers = await db.user.findAll();
@@ -124,19 +117,16 @@ async function getAllUsers() {
   }
 }
 
-//Add review till produkt
+// Lägger till recension
 async function addReview(id, review) {
-  if (!id) {
-    return createResponseError(422, "Id is obligatory");
-  }
+  if (!id) return createResponseError(422, "Id måste anges");
+  
   try {
     review.productId = id;
     await db.review.create(review);
-
     const newReview = await db.product.findOne({
       where: { id }
     });
-
     return createResponseSuccess(newReview);
   } catch (error) {
     return createResponseError(error.status, error.message);
@@ -144,129 +134,109 @@ async function addReview(id, review) {
 }
 
 async function create(cart) {
-
   try {
     const newCart = await db.cart.create(cart);
-    //post tags är en array av namn
-    //lägg till eventuella taggar
     await _addProductToCart(newCart, cart.products);
-
     return createResponseSuccess(newCart);
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
-//check
+// Uppdaterar produkt
 async function updateProduct(id, product) {
-
   try {
     const existingProduct = await db.product.findOne({ where: { id } });
     if (!existingProduct) {
-      return createResponseError(404, "Found no product to update.");
+      return createResponseError(404, "Hittade ingen produkt att uppdatera.");
     }
-    //await _addTagToPost(existingProduct, post.tags);
-    
-    await db.product.update(product, { where: { id } }); //funkar inte dubbelkolla detta
-    return createResponseMessage(200, "Product has been updated.");
+    await db.product.update(product, { where: { id } });
+    return createResponseMessage(200, "Produkten har uppdaterats.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
-//check
+// Uppdaterar användare
 async function updateUser(id, user) {
- 
   try {
     const existingUser = await db.user.findOne({ where: { id } });
     if (!existingUser) {
-      return createResponseError(404, "Found no user to update.");
+      return createResponseError(404, "Hittade ingen användare att uppdatera.");
     }
-    //await _addTagToPost(existingProduct, post.tags);
-    await db.user.update(user, { where: { id } }); //funkar inte dubbelkolla detta
-    return createResponseMessage(200, "user has been updated.");
+    await db.user.update(user, { where: { id } });
+    return createResponseMessage(200, "Användaren har uppdaterats.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
+// Uppdaterar recension
 async function updateReview(id, review) {
- 
   try {
     const existingProduct = await db.review.findOne({ where: { id } });
     if (!existingProduct) {
-      return createResponseError(404, "Found no review to update.");
+      return createResponseError(404, "Hittade ingen recension att uppdatera.");
     }
-    //await _addTagToPost(existingProduct, post.tags);
-    await db.review.update(review, { where: { id } }); //funkar inte dubbelkolla detta
-    return createResponseMessage(200, "Review has been updated.");
+    await db.review.update(review, { where: { id } });
+    return createResponseMessage(200, "Recensionen har uppdaterats.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
-//check!
+// Uppdaterar kundvagn
 async function updateCart(id, cart) {
-  
-  //Denna behöver en cart och ett ID, cart ID
-
   try {
     const existingCart = await db.cart.findOne({ where: { id } });
     if (!existingCart) {
-      return createResponseError(404, "Found no cart to update.");
+      return createResponseError(404, "Hittade ingen kundvagn att uppdatera.");
     }
-    //await _addTagToPost(existingProduct, post.tags);
-   
     await _addProductToCart(existingCart, cart.products);
-    
-    await db.cart.update(cart, { where: { id } }); //funkar inte dubbelkolla detta
-    
-    
-    return createResponseMessage(200, "Cart has been updated.");
+    await db.cart.update(cart, { where: { id } });
+    return createResponseMessage(200, "Kundvagnen har uppdaterats.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
-//check
+// Tar bort produkt
 async function destroyProduct(id) {
-  if (!id) {
-    return createResponseError(422, "Id is obligatory.");
-  }
+  if (!id) return createResponseError(422, "Id måste anges.");
+  
   try {
     await db.product.destroy({ where: { id } });
-    return createResponseMessage(200, "Product was deleted.");
+    return createResponseMessage(200, "Produkten har tagits bort.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
-//check
+// Tar bort användare
 async function destroyUser(id) {
-  if (!id) {
-    return createResponseError(422, "Id is obligatory.");
-  }
+  if (!id) return createResponseError(422, "Id måste anges.");
+  
   try {
     await db.user.destroy({ where: { id } });
-    return createResponseMessage(200, "user was deleted.");
+    return createResponseMessage(200, "Användaren har tagits bort.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
+// Tar bort recension
 async function destroyReview(id) {
+  if (!id) return createResponseError(422, "Id måste anges.");
   
-  if (!id) {
-    return createResponseError(422, "Id does not exist.");
-  }
   try {
     await db.review.destroy({ where: { id } });
-    return createResponseMessage(200, "Review was deleted.");
+    return createResponseMessage(200, "Recensionen har tagits bort.");
   } catch (error) {
     return createResponseError(error.status, error.message);
   }
 }
 
+// Formaterar produkt för frontend
 function _formatProduct(product) {
   const cleanProduct = {
     id: product.id,
@@ -304,7 +274,6 @@ function _formatProduct(product) {
 }
 
 function _formatCart(cart) {
-  
   const cleanCart = {
     id: cart.id,
     units: cart.units,
@@ -316,13 +285,11 @@ function _formatCart(cart) {
       email: cart.user.email,
       f_name: cart.user.f_name,
       l_name: cart.user.l_name,
-    }, products: cart.products,
-   
-
+    }, 
+    products: cart.products,
   };
   
-    return cleanCart;
-  
+  return cleanCart;
 }
 
 function _formatUser(user) {
@@ -350,17 +317,13 @@ function _formatUser(user) {
   }
   return cleanUser;
 }
-async function _findOrCreateproductId(id) {
- 
-  const foundOrCreatedProduct = await db.product.findOrCreate({ where: { id} });
 
+async function _findOrCreateproductId(id) {
+  const foundOrCreatedProduct = await db.product.findOrCreate({ where: { id } });
   return foundOrCreatedProduct[0].id;
 }
 
 async function _addProductToCart(cart, products) {
-
- 
-  
   if (products) {
     products.forEach(async (product) => {
       const productId = await _findOrCreateproductId(product.id);
@@ -369,7 +332,6 @@ async function _addProductToCart(cart, products) {
   }
 }
 
-//uppdatera så dessa stämmer ;D gjort!
 module.exports = {
   getProductById,
   getByUserID,

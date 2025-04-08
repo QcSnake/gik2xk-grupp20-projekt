@@ -3,14 +3,14 @@ const bcrypt = require('bcrypt');
 
 async function seedDatabase(forceProductRefresh = false) {
   try {
-    console.log("Starting database seed process...");
+    console.log("Startar databasinitiering...");
     
-    // Create hashed passwords
+    // Skapa lösenord
     const adminPassword = await bcrypt.hash('Admin123', 10);
     const customerPassword = await bcrypt.hash('Customer123', 10);
 
-    console.log("Creating users...");
-    // Create admin user
+    console.log("Skapar användare...");
+    // Admin
     await db.user.findOrCreate({
       where: { email: 'admin@example.com' },
       defaults: {
@@ -21,7 +21,7 @@ async function seedDatabase(forceProductRefresh = false) {
       }
     });
 
-    // Create customer user
+    // Kund
     await db.user.findOrCreate({
       where: { email: 'customer@example.com' },
       defaults: {
@@ -32,12 +32,12 @@ async function seedDatabase(forceProductRefresh = false) {
       }
     });
 
-    // Check if the product model exists
+    // Kontrollera om produktmodellen finns
     if (!db.product) {
-      console.error("Product model not found in db object!");
-      console.log("Available models:", Object.keys(db).filter(key => key !== 'sequelize' && key !== 'Sequelize'));
+      console.error("Produktmodellen hittades inte!");
+      console.log("Tillgängliga modeller:", Object.keys(db).filter(key => key !== 'sequelize' && key !== 'Sequelize'));
       
-      // Create the products table if it doesn't exist
+      // Skapa produkttabellen om den inte finns
       await db.sequelize.query(`
         CREATE TABLE IF NOT EXISTS products (
           id INT PRIMARY KEY AUTO_INCREMENT,
@@ -51,10 +51,10 @@ async function seedDatabase(forceProductRefresh = false) {
         )
       `);
       
-      console.log("Created products table manually");
+      console.log("Skapade produkttabellen manuellt");
     }
 
-    // Seed products manually if model isn't available
+    // Produktdata
     const products = [
       {
         title: 'Monster Hunter World',
@@ -93,11 +93,11 @@ async function seedDatabase(forceProductRefresh = false) {
       }
     ];
 
-    console.log('Seeding products...');
+    console.log('Lägger till produkter...');
     if (db.product) {
       await db.product.bulkCreate(products);
     } else {
-      // Insert manually if model doesn't exist
+      // Lägg till manuellt om modellen saknas
       for (const product of products) {
         await db.sequelize.query(`
           INSERT INTO products (title, description, price, product_img, units, created_at, updated_at)
@@ -114,30 +114,30 @@ async function seedDatabase(forceProductRefresh = false) {
       }
     }
     
-    console.log('Products seeded successfully!');
-    console.log('Database seeded successfully!');
+    console.log('Produkter tillagda!');
+    console.log('Databasinitiering slutförd!');
     return true;
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('Fel vid initiering av databas:', error);
     throw error;
   }
 }
 
-// If this file is run directly
+// Om filen körs direkt
 if (require.main === module) {
-  // Connect to the database
+  
   db.sequelize.authenticate()
     .then(() => {
-      console.log('Connected to database');
-      // Seed the database with force refresh
+      console.log('Ansluten till databas');
+      
       return seedDatabase(true);
     })
     .then(() => {
-      console.log('Seeding completed successfully');
+      console.log('Initiering slutförd');
       process.exit(0);
     })
     .catch(err => {
-      console.error('Error seeding database:', err);
+      console.error('Fel:', err);
       process.exit(1);
     });
 }

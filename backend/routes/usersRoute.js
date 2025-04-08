@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const db = require("../models");
-//const validate = require("validate.js");
 const productServices = require("../services/productServices");
 
 const constraints = {
@@ -14,7 +13,7 @@ const constraints = {
     email: {
       message: "^E-postadressen är i ett felaktigt format.",
     },
-  }, //här slutar email
+  },
   f_name: {
     length: {
       minimum: 2,
@@ -33,61 +32,57 @@ const constraints = {
   },
 };
 
-//check  get all users
+// Hämta alla användare
 router.get("/", (req, res) => {
   productServices.getAllUsers().then((result) => {
     res.status(result.status).json(result.data);
   });
 });
 
-
-//check  get carts som tillhör en user
+// Hämta kundvagnar för en användare
 router.get("/:id/carts", (req, res) => {
-  const  id= req.params.id;
-
+  const id = req.params.id;
   productServices.getByUser(id).then((result) => {
     res.status(result.status).json(result.data);
   });
 });
 
 router.get("/:id/reviews", (req, res) => {
-  const  id= req.params.id;
-
+  const id = req.params.id;
   productServices.getReviewByUser(id).then((result) => {
     res.status(result.status).json(result.data);
   });
 });
 
 router.get("/:id/review", (req, res) => {
-  const  id= req.params.id;
-
+  const id = req.params.id;
   productServices.getReviewById(id).then((result) => {
     res.status(result.status).json(result.data);
   });
 });
-//check  get en viss users via id
-router.get("/:id", (req, res)=>{
+
+// Hämta användare med ID
+router.get("/:id", (req, res) => {
   const id = req.params.id;
   productServices.getByUserID(id).then((result) => {
-    console.log("test av id via services");
     res.status(result.status).json(result.data);
   });
 });
 
-//check
+// Skapa ny användare
 router.post("/", (req, res) => {
   const user = req.body;
   
-  // Ensure new users have a password and role
+  // Sätt standardvärden om de saknas
   if (!user.password) {
-    user.password = 'default123'; // Set a default password if none provided
+    user.password = 'default123';
   }
   if (!user.role) {
-    user.role = 'customer'; // Default role
+    user.role = 'customer';
   }
   
   db.user.create(user).then((result) => {
-    // Remove password from response
+    // Ta bort lösenord från svaret
     const { password, ...userWithoutPassword } = result.toJSON();
     res.send(userWithoutPassword);
   }).catch(err => {
@@ -95,41 +90,34 @@ router.post("/", (req, res) => {
   });
 });
 
-
-router.put("/:id", (req, res)=>{
+router.put("/:id", (req, res) => {
   const id = req.params.id;
   const user = req.body
   productServices.updateUser(id, user).then((result) => {
     res.status(result.status).json(result.data);
   });
-
 });
 
-
-
-router.put("/:id/review",(req,res)=>{
+router.put("/:id/review", (req, res) => {
   const id = req.params.id;
   const review = req.body
-  productServices.updateReview(id, review).then((result)=>{
+  productServices.updateReview(id, review).then((result) => {
     res.status(result.status).json(result.data);
   });
 });
 
 router.delete("/:id/destroyReview", (req, res) => {
-  const id= req.params.id;
- 
-  
+  const id = req.params.id;
   productServices.destroyReview(id).then((result) => {
     res.status(result.status).json(result.data);
   })
-})
+});
 
-
-router.delete("/:id", (req, res)=>{
+router.delete("/:id", (req, res) => {
   const id = req.params.id;
   productServices.destroyUser(id).then((result) => {
     res.status(result.status).json(result.data);
   });
-
 });
+
 module.exports = router;

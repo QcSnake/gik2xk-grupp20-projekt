@@ -19,9 +19,8 @@ async function login(credentials) {
       return createResponseError(401, "Invalid email or password");
     }
     
-    // Handle case for users that might not have a password set yet or have plain text password
+    // Hantera användare utan lösenord
     if (!user.password || !user.password.startsWith('$2b$')) {
-      // Hash the password (for first login or migrating old passwords)
       const hashedPassword = await bcrypt.hash(credentials.password, 10);
       await user.update({ 
         password: hashedPassword,
@@ -39,13 +38,12 @@ async function login(credentials) {
       return createResponseSuccess(userDetails);
     }
     
-    // Compare password with hashed password
+    // Jämför lösenord
     const passwordMatch = await bcrypt.compare(credentials.password, user.password);
     if (!passwordMatch) {
       return createResponseError(401, "Invalid email or password");
     }
 
-    // Don't send the password back to the client
     const userDetails = {
       id: user.id,
       email: user.email,
@@ -60,32 +58,27 @@ async function login(credentials) {
   }
 }
 
-// Add user registration functionality
 async function register(userData) {
   try {
     if (!userData.email || !userData.password || !userData.f_name || !userData.l_name) {
       return createResponseError(400, "Email, password, first name, and last name are required");
     }
 
-    // Check if user already exists
     const existingUser = await db.user.findOne({ where: { email: userData.email } });
     if (existingUser) {
       return createResponseError(409, "A user with this email already exists");
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     
-    // Create new user with customer role by default
     const newUser = await db.user.create({
       email: userData.email,
       password: hashedPassword,
       f_name: userData.f_name,
       l_name: userData.l_name,
-      role: 'customer' // Default role for new users
+      role: 'customer'
     });
 
-    // Return user data without password
     const userDetails = {
       id: newUser.id,
       email: newUser.email,
@@ -100,11 +93,10 @@ async function register(userData) {
   }
 }
 
-// Reset database function for admins
+// Återställ databas
 async function resetDatabase() {
   try {
-    // Call the database seeding function
-    await seedDatabase(true); // Pass true to force repopulate products
+    await seedDatabase(true);
     return createResponseMessage(200, "Database reset successfully");
   } catch (error) {
     return createResponseError(500, "Failed to reset database: " + error.message);

@@ -19,7 +19,6 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 // Import components
-import ProductList from "./components/ProductList";
 import ProductDetail from "./views/ProductDetail";
 import ProductEdit from "./views/ProductEdit";
 import Login from "./views/Login";
@@ -48,7 +47,6 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          // Removed hover effects as requested
         }
       }
     }
@@ -89,7 +87,7 @@ function AppContent() {
               Snabbis
             </Typography>
             
-            {/* Horizontal Navigation Menu - Translated to Swedish */}
+            {/*  Navigation Menu - ??*/}
             <Stack direction="row" spacing={2}>
               <Button color="inherit" component={Link} to="/">
                 Produkter
@@ -138,7 +136,7 @@ function AppContent() {
 
       <Container sx={{ mt: 4, pb: 8 }}>
         <Routes>
-          {/* Home and Products now use the same component */}
+          {/* Samma */}
           <Route path="/" element={<Products />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productDetail/:id" element={<ProductDetail />} />

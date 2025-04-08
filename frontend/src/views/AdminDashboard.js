@@ -19,7 +19,7 @@ import {
   TableRow,
   Chip
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { getAllProducts, remove } from '../models/productModel';
 
@@ -28,7 +28,6 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const navigate = useNavigate();
   
   useEffect(() => {
     fetchProducts();
@@ -40,10 +39,9 @@ function AdminDashboard() {
       const data = await getAllProducts();
       setProducts(data);
     } catch (error) {
-      console.error('Failed to fetch products:', error);
       setSnackbar({
         open: true,
-        message: 'Failed to load products. Please try again.',
+        message: 'Kunde inte ladda produkter. Försök igen.',
         severity: 'error'
       });
     } finally {
@@ -60,15 +58,14 @@ function AdminDashboard() {
       await remove(deleteDialog.product);
       setSnackbar({
         open: true,
-        message: 'Product deleted successfully!',
+        message: 'Produkten har tagits bort!',
         severity: 'success'
       });
-      fetchProducts(); // Refresh products
+      fetchProducts();
     } catch (error) {
-      console.error('Error deleting product:', error);
       setSnackbar({
         open: true,
-        message: 'Failed to delete product. Please try again.',
+        message: 'Kunde inte ta bort produkten. Försök igen.',
         severity: 'error'
       });
     } finally {
@@ -130,7 +127,7 @@ function AdminDashboard() {
                   />
                 </TableCell>
                 <TableCell>{product.title}</TableCell>
-                <TableCell>${product.price}</TableCell>
+                <TableCell>{product.price} kr</TableCell>
                 <TableCell>
                   <Chip 
                     label={product.units} 
@@ -171,7 +168,6 @@ function AdminDashboard() {
         </Table>
       </TableContainer>
       
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, product: null })}>
         <DialogTitle>Ta bort produkt</DialogTitle>
         <DialogContent>
@@ -185,7 +181,6 @@ function AdminDashboard() {
         </DialogActions>
       </Dialog>
       
-      {/* Snackbar for notifications */}
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}

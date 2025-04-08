@@ -1,34 +1,27 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
 var app = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
 const seedDatabase = require('../seeders/dbSeed');
 
-/**
- * Get port from environment and store in Express.
- */
+
 var port = normalizePort(process.env.PORT || '5000');
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
+// Skapa HTTP-server
 var server = http.createServer(app);
 
 const db = require("../models/");
 
-// Connect to database and start server
+// Anslut till databasen och starta servern
 async function startServer() {
   try {
-    // Test database connection
+    // Testa databasanslutning
     await db.sequelize.authenticate();
-    console.log('Database connection has been established successfully.');
+    console.log('Ansluten till databasen.');
     
-    // Create products table directly if needed
+    // Skapa produkttabell om den behövs
     try {
       await db.sequelize.query(`
         CREATE TABLE IF NOT EXISTS products (
@@ -42,61 +35,47 @@ async function startServer() {
           updated_at DATETIME NOT NULL
         )
       `);
-      console.log("Ensured products table exists");
+      console.log("Produkttabellen finns nu");
     } catch (tableErr) {
-      console.error("Error ensuring products table:", tableErr.message);
+      console.error("Fel vid skapande av produkttabell:", tableErr.message);
     }
     
-    // Force recreate all tables - use with caution as this will delete all data
     try {
-      console.log('Forcing recreate of all tables to fix schema issues');
+      console.log('Återskapar alla tabeller');
       await db.sequelize.sync({ force: true });
-      console.log('Database tables recreated successfully');
+      console.log('Tabeller återskapade');
     } catch (err) {
-      console.error('Error recreating tables:', err.message);
+      console.error('Kunde inte återskapa tabeller:', err.message);
       process.exit(1);
     }
     
-    // Seed the database with initial data
+    // Fyll databasen med startdata
     await seedDatabase();
-    console.log('Database seeded successfully');
+    console.log('Databas initierad');
     
-    // Start the server
+    // Starta servern
     server.listen(port);
     server.on('error', onError);
     server.on('listening', onListening);
     
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server igång på http://localhost:${port}`);
   } catch (error) {
-    console.error('Unable to connect to the database or start server:', error);
+    console.error('Kunde inte ansluta till databasen:', error);
     process.exit(1);
   }
 }
 
 startServer();
 
-/**
- * Normalize a port into a number, string, or false.
- */
+
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
+  if (isNaN(port)) return val;
+  if (port >= 0) return port;
   return false;
 }
 
-/**
- * Event listener for HTTP server "error" event.
- */
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
@@ -106,14 +85,14 @@ function onError(error) {
     ? 'Pipe ' + port
     : 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
+  // Visa felmeddelanden
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      console.error(bind + ' kräver förhöjda rättigheter');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      console.error(bind + ' används redan');
       process.exit(1);
       break;
     default:
@@ -121,13 +100,11 @@ function onError(error) {
   }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
+// Server lyssnar
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  debug('Lyssnar på ' + bind);
 }

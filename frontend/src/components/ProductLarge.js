@@ -17,7 +17,7 @@ function ProductLarge({ product }) {
 
   async function addToCart() {
     if (!user) {
-      // Redirect to login if not logged in
+      // Skicka till inloggning om användaren inte är inloggad
       setAlertMessage("Logga in för att lägga till varor i kundvagnen");
       setAlertSeverity("warning");
       setAlertOpen(true);
@@ -26,11 +26,10 @@ function ProductLarge({ product }) {
     }
 
     try {
-      // Get the user's current cart or create one if it doesn't exist
+      // Hämta användarens kundvagn eller skapa en ny
       let cart = await getByUser(user.id);
       
       if (!cart) {
-        // Create a new cart for the user
         cart = {
           userId: user.id,
           units: 0,
@@ -39,27 +38,26 @@ function ProductLarge({ product }) {
         };
       }
       
-      // Check if product already exists in cart
+      // Kontrollera om produkten redan finns i kundvagnen
       const existingProductIndex = cart.products.findIndex(p => p.id === product.id);
       
       if (existingProductIndex >= 0) {
-        // Update quantity if product already in cart
+        // Uppdatera antal
         cart.products[existingProductIndex].quantity += parseInt(quantity);
       } else {
-        // Add new product to cart
+        // Lägg till ny produkt
         cart.products.push({
           ...product,
           quantity: parseInt(quantity)
         });
       }
       
-      // Update cart totals
+      // Uppdatera totaler
       cart.units = cart.products.reduce((total, product) => total + product.quantity, 0);
       cart.total_amount = cart.products.reduce(
         (total, product) => total + (product.price * product.quantity), 0
       );
       
-      // Save the updated cart
       await updateCart(cart, cart.id);
       
       setAlertMessage("Tillagd i kundvagnen!");
