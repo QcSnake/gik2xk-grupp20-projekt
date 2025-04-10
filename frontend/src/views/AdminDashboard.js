@@ -110,7 +110,7 @@ function AdminDashboard() {
               <TableCell>Bild</TableCell>
               <TableCell>Titel</TableCell>
               <TableCell>Pris</TableCell>
-              <TableCell>Lager</TableCell>
+              <TableCell>Lagersaldo</TableCell>
               <TableCell width="200">Åtgärder</TableCell>
             </TableRow>
           </TableHead>

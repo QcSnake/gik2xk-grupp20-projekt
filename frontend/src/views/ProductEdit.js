@@ -165,7 +165,7 @@ function ProductEdit() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     name="price"
-                    label="Pris"
+                    label="Pris (kr)"
                     type="number"
                     value={product.price}
                     fullWidth
@@ -178,7 +178,7 @@ function ProductEdit() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     name="units"
-                    label="Antal i lager"
+                    label="Lagersaldo"
                     type="number"
                     value={product.units}
                     fullWidth
@@ -241,16 +241,16 @@ function ProductEdit() {
             />
             <Box sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
-                {product.title || "Product Title"}
+                {product.title || "Produkttitel"}
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                {product.description || "Product description will appear here."}
+                {product.description || "Produktbeskrivning visas här."}
               </Typography>
               <Typography variant="h5" color="primary">
-                ${product.price || "0.00"}
+                {product.price || "0.00"} kr
               </Typography>
               <Typography variant="body2" sx={{ mt: 1 }}>
-                Stock: {product.units || 0} units
+                Lagersaldo: {product.units || 0} st
               </Typography>
             </Box>
           </Card>

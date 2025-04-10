@@ -114,29 +114,37 @@ router.post("/:id/createReview", requireAuth, (req, res) => {
 });
 
 // Uppdatera produkt (endast admin)
-router.put("/:id", requireAdmin, (req, res) => {
+router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const product = req.body;
     
-    db.product.update(product, {
+    console.log(`Uppdaterar produkt ${id}:`, product);
+    
+    const existingProduct = await db.product.findByPk(id);
+    
+    if (!existingProduct) {
+      console.log(`Produkt ${id} hittades inte`);
+      return res.status(404).json({ error: "Produkt hittades inte" });
+    }
+    
+    // Använd await för att säkerställa att uppdateringen slutförs
+    const [updated] = await db.product.update(product, {
       where: { id: id }
-    })
-    .then(([updated]) => {
-      if (updated) {
-        return db.product.findByPk(id);
-      } else {
-        throw new Error("Produkt hittades inte");
-      }
-    })
-    .then(updatedProduct => {
-      res.status(200).json(updatedProduct);
-    })
-    .catch(err => {
-      res.status(500).json({ error: "Kunde inte uppdatera produkt: " + err.message });
     });
+    
+    if (updated) {
+      console.log(`Produkt ${id} uppdaterad, hämtar den uppdaterade produkten`);
+      const updatedProduct = await db.product.findByPk(id);
+      console.log(`Uppdaterad produkt:`, updatedProduct.toJSON());
+      return res.status(200).json(updatedProduct);
+    } else {
+      console.log(`Ingen produkt uppdaterades`);
+      return res.status(404).json({ error: "Uppdateringen misslyckades" });
+    }
   } catch (error) {
-    res.status(500).json({ error: "Serverfel" });
+    console.error("Fel vid uppdatering av produkt:", error);
+    res.status(500).json({ error: "Kunde inte uppdatera produkt: " + error.message });
   }
 });
 

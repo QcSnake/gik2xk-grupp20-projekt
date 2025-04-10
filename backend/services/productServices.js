@@ -146,14 +146,25 @@ async function create(cart) {
 // Uppdaterar produkt
 async function updateProduct(id, product) {
   try {
+    console.log(`productServices: Uppdaterar produkt ${id}:`, product);
+    
     const existingProduct = await db.product.findOne({ where: { id } });
     if (!existingProduct) {
+      console.log(`productServices: Produkt ${id} hittades inte`);
       return createResponseError(404, "Hittade ingen produkt att uppdatera.");
     }
+    
+    // Kör uppdatering och vänta på resultatet
     await db.product.update(product, { where: { id } });
-    return createResponseMessage(200, "Produkten har uppdaterats.");
+    
+    // Hämta den uppdaterade produkten för att bekräfta ändringarna
+    const updatedProduct = await db.product.findByPk(id);
+    console.log(`productServices: Produkt uppdaterad:`, updatedProduct.toJSON());
+    
+    return createResponseSuccess(updatedProduct);
   } catch (error) {
-    return createResponseError(error.status, error.message);
+    console.error(`productServices: Fel vid uppdatering av produkt ${id}:`, error);
+    return createResponseError(error.status || 500, error.message);
   }
 }
 

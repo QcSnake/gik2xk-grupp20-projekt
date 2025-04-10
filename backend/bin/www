@@ -41,17 +41,24 @@ async function startServer() {
     }
     
     try {
-      console.log('Återskapar alla tabeller');
-      await db.sequelize.sync({ force: true });
-      console.log('Tabeller återskapade');
+      console.log('Synkroniserar databastabeller');
+      // VIKTIG ÄNDRING: Ändra force: true till force: false för att behålla data
+      await db.sequelize.sync({ force: false });
+      console.log('Databastabeller synkroniserade');
     } catch (err) {
-      console.error('Kunde inte återskapa tabeller:', err.message);
+      console.error('Kunde inte synkronisera tabeller:', err.message);
       process.exit(1);
     }
     
-    // Fyll databasen med startdata
-    await seedDatabase();
-    console.log('Databas initierad');
+    // Seeda databasen endast om produkttabellen är tom
+    const productCount = await db.product.count().catch(() => 0);
+    if (productCount === 0) {
+      console.log('Produkttabellen tom, initierar startdata...');
+      await seedDatabase();
+      console.log('Databas initierad med startdata');
+    } else {
+      console.log(`Hittade ${productCount} produkter, hoppar över seedning`);
+    }
     
     // Starta servern
     server.listen(port);

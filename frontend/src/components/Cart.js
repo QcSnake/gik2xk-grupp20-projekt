@@ -196,17 +196,6 @@ function Cart() {
                 <Typography variant="body1">{totalPrice.toFixed(2)} kr</Typography>
               </Box>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 1,
-                }}
-              >
-                <Typography variant="body1">Frakt</Typography>
-                <Typography variant="body1">Gratis</Typography>
-              </Box>
-
               <Divider sx={{ my: 2 }} />
 
               <Box
