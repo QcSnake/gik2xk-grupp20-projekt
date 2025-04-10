@@ -5,7 +5,6 @@ var debug = require('debug')('server:server');
 var http = require('http');
 const seedDatabase = require('../seeders/dbSeed');
 
-
 var port = normalizePort(process.env.PORT || '5000');
 app.set('port', port);
 
@@ -13,6 +12,7 @@ app.set('port', port);
 var server = http.createServer(app);
 
 const db = require("../models/");
+const authService = require('../services/authService');  // Import authService
 
 // Anslut till databasen och starta servern
 async function startServer() {
@@ -60,6 +60,11 @@ async function startServer() {
       console.log(`Hittade ${productCount} produkter, hoppar över seedning`);
     }
     
+    // Säkerställ att admin- och kundkonton har rätt lösenord
+    console.log('Säkerställer att standard-konton finns...');
+    await authService.ensureAdminAccount();
+    console.log('Standardkonton kontrollerade');
+    
     // Starta servern
     server.listen(port);
     server.on('error', onError);
@@ -73,7 +78,6 @@ async function startServer() {
 }
 
 startServer();
-
 
 function normalizePort(val) {
   var port = parseInt(val, 10);

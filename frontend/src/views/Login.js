@@ -1,43 +1,74 @@
 import { useState } from 'react';
-import { TextField, Button, Typography, Container, Box, Alert, Link as MuiLink } from '@mui/material';
+import { TextField, Button, Typography, Container, Box, Alert, Link as MuiLink, Paper, CircularProgress } from '@mui/material';
 import { login } from '../models/authModel';
 import { useNavigate, Link } from 'react-router-dom';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 function Login() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   async function handleLogin(e) {
     e.preventDefault();
     setError('');
+    setLoading(true);
     
     try {
-      const user = await login(credentials);
-      // Store user in localStorage (in a real app, consider using context or state management)
-      localStorage.setItem('user', JSON.stringify(user));
+      console.log("Loggar in med:", credentials);
+      const result = await login(credentials.email, credentials.password);
+      console.log("Login resultat:", result);
       
-      // Redirect based on role
-      if (user.role === 'admin') {
-        navigate('/admin');
+      if (result && result.id) {
+        setLoading(false);
+        
+        // Trigger auth event to update UI
+        window.dispatchEvent(new Event('auth-change'));
+        
+        // Redirect based on role
+        setTimeout(() => {
+          if (result.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/products');
+          }
+        }, 500);
       } else {
-        navigate('/products');
+        setError('Inloggningen misslyckades.');
+        setLoading(false);
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError(err.message || 'Inloggningen misslyckades. Kontrollera dina uppgifter.');
+      setLoading(false);
     }
   }
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">
+      <Paper sx={{ p: 4, mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{ 
+          width: 40, 
+          height: 40, 
+          bgcolor: 'primary.main', 
+          color: 'white',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 2
+        }}>
+          <LockOutlinedIcon />
+        </Box>
+        
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
           Logga in
         </Typography>
         
-        {error && <Alert severity="error" sx={{ width: '100%', mt: 2 }}>{error}</Alert>}
+        {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
         
-        <Box component="form" onSubmit={handleLogin} sx={{ mt: 1, width: '100%' }}>
+        <Box component="form" onSubmit={handleLogin} sx={{ width: '100%' }}>
           <TextField
             margin="normal"
             required
@@ -66,18 +97,21 @@ function Login() {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3, mb: 2, py: 1.5 }}
+            disabled={loading}
           >
-            Logga in
+            {loading ? <CircularProgress size={24} /> : 'Logga in'}
           </Button>
           
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Typography variant="body2">
-              Har du inget konto?{' '}
-              <MuiLink component={Link} to="/register">
-                Registrera dig nu
-              </MuiLink>
-            </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Button
+              component={Link}
+              to="/register"
+              variant="outlined"
+              sx={{ width: '100%', py: 1 }}
+            >
+              Registrera dig
+            </Button>
           </Box>
           
           <Box sx={{ mt: 4 }}>
@@ -92,7 +126,7 @@ function Login() {
             </Typography>
           </Box>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 }

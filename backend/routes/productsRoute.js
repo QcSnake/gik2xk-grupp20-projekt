@@ -49,7 +49,13 @@ router.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const product = await db.product.findByPk(id, {
-      include: [{ model: db.review }]
+      include: [{ 
+        model: db.review,
+        include: [{ 
+          model: db.user,
+          attributes: ['id', 'f_name', 'l_name'] // Only include needed user fields
+        }]
+      }]
     });
     
     if (!product) {
@@ -58,15 +64,30 @@ router.get("/:id", async (req, res) => {
     
     const productObj = product.toJSON();
     
+    // Process reviews to include user details
     if (productObj.reviews && productObj.reviews.length > 0) {
       const totalRating = productObj.reviews.reduce((sum, review) => sum + review.rating, 0);
       productObj.averageRating = totalRating / productObj.reviews.length;
+      
+      // Add user details to each review
+      productObj.reviews = productObj.reviews.map(review => {
+        if (review.user) {
+          review.userDetails = {
+            id: review.user.id,
+            f_name: review.user.f_name,
+            l_name: review.user.l_name
+          };
+          delete review.user; // Remove the nested user object
+        }
+        return review;
+      });
     } else {
       productObj.averageRating = 0;
     }
     
     return res.status(200).json(productObj);
   } catch (error) {
+    console.error("Error fetching product:", error);
     res.status(500).json({ error: "Kunde inte hämta produkt" });
   }
 });
@@ -103,14 +124,38 @@ router.post("/:id/addToCart", requireAuth, (req, res) => {
 });
 
 // Skapa recension för produkt
-router.post("/:id/createReview", requireAuth, (req, res) => {
-  const prodId = req.params.id;
-  const review = req.body;
-  review.userId = req.user.id;
-  
-  productServices.addReview(prodId, review).then((result) => {
-    res.send(result);
-  });
+router.post("/:id/createReview", requireAuth, async (req, res) => {
+  try {
+    const prodId = req.params.id;
+    const review = req.body;
+    
+    // Ensure the review has the correct user ID from the authenticated user
+    review.userId = req.user.id;
+    
+    console.log(`Creating review for product ${prodId} by user ${req.user.id}:`, review);
+    
+    const savedReview = await db.review.create(review);
+    
+    // Return the product with the new review
+    const product = await db.product.findByPk(prodId, {
+      include: [{
+        model: db.review,
+        include: [{ 
+          model: db.user,
+          attributes: ['id', 'f_name', 'l_name'] 
+        }]
+      }]
+    });
+    
+    if (!product) {
+      return res.status(404).json({ error: "Produkt hittades inte" });
+    }
+    
+    res.status(200).json(product);
+  } catch (error) {
+    console.error("Error creating review:", error);
+    res.status(500).json({ error: "Kunde inte skapa recension: " + error.message });
+  }
 });
 
 // Uppdatera produkt (endast admin)

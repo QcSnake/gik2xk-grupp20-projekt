@@ -1,20 +1,32 @@
 import api from '../api.js';
 
-export async function login(credentials) {
+export async function login(email, password) {
   try {
+    console.log("Försöker logga in med:", email);
+    const credentials = { email, password };
+    
     const result = await api.post('/auth/login', credentials);
     
-    if (result.status === 200) {
-      // Store user in localStorage and set up API header for future requests
+    if (result.status === 200 && result.data) {
+      console.log("Inloggning lyckades:", result.data);
+      
+      // Store user in localStorage
       localStorage.setItem('user', JSON.stringify(result.data));
+      
+      // Set auth header for future requests
       api.defaults.headers.common['X-User-Info'] = JSON.stringify(result.data);
+      
+      // Dispatch auth change event to update UI everywhere
+      window.dispatchEvent(new Event('auth-change'));
+      
       return result.data;
     } else {
-      throw new Error(result.data.error || 'Login failed');
+      console.error("Oväntat svar från servern:", result);
+      throw new Error(result.data?.error || 'Inloggning misslyckades');
     }
   } catch (error) {
-    console.error('Login error:', error);
-    throw new Error(error.response?.data?.error || 'Login failed. Please try again.');
+    console.error('Inloggningsfel:', error);
+    throw new Error(error.response?.data?.error || 'Inloggning misslyckades. Försök igen.');
   }
 }
 
@@ -34,14 +46,39 @@ export async function register(userData) {
 }
 
 export function getCurrentUser() {
-  const userJson = localStorage.getItem('user');
-  return userJson ? JSON.parse(userJson) : null;
+  try {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) return null;
+    
+    const user = JSON.parse(userJson);
+    
+    // Verify user object is valid
+    if (!user || !user.id || !user.email) {
+      console.warn("Invalid user data in localStorage, clearing...");
+      localStorage.removeItem('user');
+      return null;
+    }
+    
+    // Also set the header when getting current user (helps when page refreshes)
+    api.defaults.headers.common['X-User-Info'] = userJson;
+    
+    return user;
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    localStorage.removeItem('user');
+    return null;
+  }
 }
 
 export function logout() {
+  // Remove user from localStorage
   localStorage.removeItem('user');
-  // Remove the header
+  
+  // Remove auth header
   delete api.defaults.headers.common['X-User-Info'];
+  
+  // Dispatch auth change event
+  window.dispatchEvent(new Event('auth-change'));
 }
 
 export function isAdmin() {
@@ -64,8 +101,9 @@ export async function resetDatabase() {
   }
 }
 
-// Initialize header if user is logged in
+// This runs when the file is imported - ensure headers are set on page load
 const user = getCurrentUser();
 if (user) {
+  console.log("Found existing user session:", user.email);
   api.defaults.headers.common['X-User-Info'] = JSON.stringify(user);
 }

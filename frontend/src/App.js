@@ -15,7 +15,7 @@ import {
   Avatar,
   Stack,
 } from "@mui/material";
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 // Import components
@@ -57,19 +57,33 @@ function AppContent() {
   const { cartItems } = useCart();
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  
+  const location = useLocation();
+
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-  }, []);
-  
+    const updateUserState = () => {
+      const currentUser = getCurrentUser();
+      setUser(currentUser);
+      console.log("User state updated:", currentUser);
+    };
+
+    updateUserState();
+
+    window.addEventListener('auth-change', updateUserState);
+
+    return () => {
+      window.removeEventListener('auth-change', updateUserState);
+    };
+  }, [location.pathname]);
+
   const isAdmin = user && user.role === 'admin';
   const isLoggedIn = !!user;
 
   const handleLogout = () => {
     logout();
+    setUser(null);
     navigate('/');
-    window.location.reload(); // Refresh to clear state
+
+    window.dispatchEvent(new Event('auth-change'));
   };
 
   return (
@@ -87,7 +101,6 @@ function AppContent() {
               Snabbis
             </Typography>
             
-            {/*  Navigation Menu - ??*/}
             <Stack direction="row" spacing={2}>
               <Button color="inherit" component={Link} to="/">
                 Produkter
@@ -109,15 +122,32 @@ function AppContent() {
             
             {isLoggedIn ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ mr: 1 }}>
-                  {user.f_name}
-                </Typography>
+                <Box sx={{ mr: 2, textAlign: 'right' }}>
+                  <Typography variant="body2" sx={{ lineHeight: 1.2 }}>
+                    {user?.f_name} {user?.l_name}
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: 'block', color: 'white.main' }}>
+                    {user?.role === 'admin' ? 'Administrator' : 'Kund'}
+                  </Typography>
+                </Box>
                 <Avatar 
-                  sx={{ width: 32, height: 32, bgcolor: isAdmin ? 'secondary.main' : 'primary.main', mr: 2 }}
+                  sx={{ 
+                    width: 32, 
+                    height: 32, 
+                    bgcolor: isAdmin ? 'secondary.main' : 'primary.main', 
+                    mr: 2,
+                    border: '2px solid white'
+                  }}
                 >
-                  {user.f_name ? user.f_name[0].toUpperCase() : 'A'}
+                  {user?.f_name ? user.f_name[0].toUpperCase() : 'A'}
                 </Avatar>
-                <Button color="inherit" onClick={handleLogout}>
+                <Button 
+                  color="inherit" 
+                  onClick={handleLogout}
+                  variant="outlined"
+                  size="small"
+                  sx={{ borderColor: 'rgba(255,255,255,0.5)' }}
+                >
                   Logga ut
                 </Button>
               </Box>
@@ -126,6 +156,9 @@ function AppContent() {
                 component={Link} 
                 to="/login" 
                 color="inherit"
+                variant="outlined"
+                size="small"
+                sx={{ borderColor: 'rgba(255,255,255,0.5)' }}
               >
                 Logga in
               </Button>
@@ -136,7 +169,6 @@ function AppContent() {
 
       <Container sx={{ mt: 4, pb: 8 }}>
         <Routes>
-          {/* Samma */}
           <Route path="/" element={<Products />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productDetail/:id" element={<ProductDetail />} />

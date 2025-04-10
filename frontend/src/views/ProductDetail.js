@@ -17,7 +17,7 @@ import {
   Alert,
   Container,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { getProductsById, addReview } from "../models/productModel";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useCart } from "../contexts/CartContext";
@@ -254,35 +254,53 @@ function ProductDetail() {
                 Skriv en recension
               </Typography>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography component="legend">Ditt betyg</Typography>
-                <Rating
-                  name="rating"
-                  value={reviewRating}
-                  onChange={(event, newValue) => {
-                    setReviewRating(newValue);
-                  }}
-                  precision={0.5}
-                />
-              </Box>
+              {user ? (
+                <>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography component="legend">Ditt betyg</Typography>
+                    <Rating
+                      name="rating"
+                      value={reviewRating}
+                      onChange={(event, newValue) => {
+                        setReviewRating(newValue);
+                      }}
+                      precision={0.5}
+                    />
+                  </Box>
 
-              <TextField
-                label="Din recension"
-                multiline
-                rows={4}
-                fullWidth
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                sx={{ mb: 2 }}
-              />
+                  <TextField
+                    label="Din recension"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    sx={{ mb: 2 }}
+                  />
 
-              <Button
-                variant="contained"
-                onClick={handleSubmitReview}
-                fullWidth
-              >
-                Skicka recension
-              </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleSubmitReview}
+                    fullWidth
+                  >
+                    Skicka recension
+                  </Button>
+                </>
+              ) : (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Du måste vara inloggad för att lämna en recension.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/login"
+                    fullWidth
+                  >
+                    Logga in för att recensera
+                  </Button>
+                </Box>
+              )}
             </CardContent>
           </Card>
 
@@ -335,10 +353,10 @@ function ProductDetail() {
                             mr: 1,
                           }}
                         >
-                          {review.userId?.toString().charAt(0) || "U"}
+                          {review.userDetails ? review.userDetails.f_name[0] : (review.userId?.toString().charAt(0) || "U")}
                         </Avatar>
                         <Typography variant="subtitle2">
-                          Customer {review.userId}
+                          {review.userDetails ? `${review.userDetails.f_name} ${review.userDetails.l_name}` : `Användare ${review.userId}`}
                         </Typography>
                       </Box>
 
