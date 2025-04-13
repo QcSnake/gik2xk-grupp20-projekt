@@ -6,7 +6,6 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   
-  // Load cart from localStorage on initial render
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -18,24 +17,24 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
   
-  // Save cart to localStorage whenever it changes
+  //Spara cart i localStorage när den ändras
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (product) => {
     setCartItems(prevItems => {
-      // Check if product already exists in cart
+      // Kolla om prodcten finns 
       const existingItemIndex = prevItems.findIndex(item => item.id === product.id);
       
       if (existingItemIndex !== -1) {
-        // Update quantity if product already exists
+        // Produkten finns, öka kvantiteten
         const updatedItems = [...prevItems];
         const currentQuantity = updatedItems[existingItemIndex].quantity || 1;
         updatedItems[existingItemIndex].quantity = currentQuantity + 1;
         return updatedItems;
       } else {
-        // Add new product with quantity 1
+        // Produkten finns inte, lägg till den
         return [...prevItems, { ...product, quantity: 1 }];
       }
     });
