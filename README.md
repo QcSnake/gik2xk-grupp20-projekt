@@ -1,6 +1,4 @@
-## How to Run the Application
-
-### Frontend
+ Frontend
 1. Navigate to the frontend directory:
     ```bash
     cd frontend
